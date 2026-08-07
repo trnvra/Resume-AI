@@ -1,0 +1,23 @@
+User 1 - Frontend Developer 
+Job Description:
+We are looking for a Frontend Developer with strong proficiency in React.js, TypeScript, and Tailwind CSS. The candidate should have experience in building responsive web applications, state management using Redux or Zustand, and performance optimization. Knowledge of Next.js, REST API integration, and Git is required.
+Self Description:
+I am a Frontend Developer with 2 years of experience in building responsive web applications using React.js and Tailwind CSS. I have worked on multiple projects involving Redux state management and REST API integration. I am familiar with TypeScript and have basic knowledge of Next.js. I am passionate about UI/UX and always focus on delivering pixel-perfect designs.
+
+User 2 - Backend Developer
+Job Description:
+We are hiring a Backend Developer with strong knowledge of Node.js, Express.js, and MongoDB. The candidate should have experience in building REST APIs, JWT Authentication, and database schema design. Knowledge of Docker, Redis caching, and cloud deployment (AWS/GCP) is a plus.
+Self Description:
+I am a Backend Developer with 1.5 years of experience in Node.js and Express.js. I have built multiple REST APIs with JWT Authentication and MongoDB. I have basic knowledge of Docker and have deployed applications on Vercel and Railway. I am currently learning Redis and AWS to improve my backend skills.
+
+User 3 - Full Stack Developer
+Job Description:
+We are looking for a Full Stack Developer proficient in React.js, Node.js, Express.js, and PostgreSQL. The candidate should have experience in building scalable web applications, microservices architecture, and CI/CD pipelines. Strong knowledge of TypeScript, Docker, and cloud platforms is required.
+Self Description:
+I am a Full Stack Developer with 3 years of experience in React.js and Node.js. I have worked on large-scale applications using PostgreSQL and MongoDB. I have hands-on experience with Docker and have set up CI/CD pipelines using GitHub Actions. I am comfortable with TypeScript and have deployed applications on AWS EC2 and S3.
+
+User 4 - React Native Developer
+Job Description:
+We are looking for a React Native Developer to build cross-platform mobile applications for iOS and Android. The candidate should have strong knowledge of React Native, Redux, and REST API integration. Experience with Firebase, push notifications, and app store deployment is required.
+Self Description:
+I am a Mobile App Developer with 1 year of experience in React Native. I have built 2 cross-platform apps for iOS and Android with Redux state management and Firebase integration. I have experience in push notifications and have successfully deployed apps on Google Play Store. I am passionate about mobile development and always focus on smooth user experience.
