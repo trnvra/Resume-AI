@@ -27,7 +27,7 @@ const QuestionCard = ({ item, index, jobDescription, report }) => {
              // Token localstorage / cookies dono se try karte hain
              const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
             
-             const response = await axios.post('http://localhost:3000/api/interview/evaluate-answer', {
+             const response = await axios.post('https://resume-ai-rore.onrender.com/api/interview/evaluate-answer', {
                  question: item.question,
                  userAnswer,
                  jobDescription

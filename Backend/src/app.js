@@ -10,7 +10,7 @@ app.use(cors({
     origin: [
         "http://localhost:5173",
         "https://resume-ai-phi-black.vercel.app",
-        process.env.CLIENT_URL
+        "https://resume-2x0p0armt-taruns-projects-6bdb987b.vercel.app"
     ],
     credentials: true
 }))
