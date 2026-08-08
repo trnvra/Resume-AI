@@ -33,9 +33,9 @@ const QuestionCard = ({ item, index, jobDescription, report }) => {
                  jobDescription
              }, {
                  headers: { 
-                     Authorization: token ? `Bearer ${token}` : '' 
+                    Authorization: token ? `Bearer ${token}` : '' 
                 },
-                 withCredentials: true // Cookie-based auth ke liye zaroori hai
+                withCredentials: true // Cookie-based auth ke liye zaroori hai
              })
 
            console.log("Evaluation Response:", response.data);

@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    withCredentials: true,
+    baseURL: "https://resume-ai-rore.onrender.com",
+    withCredentials: true
 })
 
 
