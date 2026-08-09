@@ -1,0 +1,25 @@
+const express = require("express")
+const cookieParser = require("cookie-parser")
+const cors = require("cors")
+
+const app = express()
+ 
+app.use(express.json())
+app.use(cookieParser()) 
+app.use(cors({
+    origin: [
+        "http://localhost:5173",
+        "https://resume-ai-phi-black.vercel.app",
+        "https://resume-nlek3s9eb-taruns-projects-6bdb987b.vercel.app"
+    ],
+    credentials: true
+}))
+
+const authRouter = require("./routes/auth.routes")
+const interview = require("./routes/interview.routes")
+const interviewRouter = require("./routes/interview.routes")
+
+app.use("/api/auth", authRouter)
+app.use("/api/interview", interviewRouter)
+
+module.exports = app
