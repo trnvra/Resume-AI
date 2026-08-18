@@ -1056,20 +1056,72 @@ function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDesc
 //     await browser.close()
 //     return pdfBuffer
 // }
+function createFallbackPdfBuffer(title, textContent) {
+    const sanitize = (str) => (str || '').replace(/[()\\\\]/g, '\\$&');
+    const cleanLines = (textContent || '')
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<[^>]+>/g, '\n')
+        .split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length > 0)
+        .slice(0, 35);
+
+    let streamText = `BT\n/F1 18 Tf\n50 780 Td\n(${sanitize(title)}) Tj\n/F1 10 Tf\n0 -24 Td\n`;
+    cleanLines.forEach(line => {
+        streamText += `(${sanitize(line)}) Tj\n0 -14 Td\n`;
+    });
+    streamText += `ET\n`;
+
+    const streamLen = Buffer.byteLength(streamText, 'utf-8');
+    const pdf = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length ${streamLen} >>
+stream
+${streamText}endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+0
+%%EOF`;
+
+    return Buffer.from(pdf, 'utf-8');
+}
+
 async function generatePdfFromHtml(htmlContent) {
-    const browser = await puppeteer.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: chromium.headless,
-    })
-
     try {
-        const page = await browser.newPage()
+        const chromiumRaw = require("@sparticuz/chromium");
+        const chromium = chromiumRaw.default || chromiumRaw;
 
-        await page.setContent(htmlContent, {
-            waitUntil: "networkidle0"
-        })
+        let execPath;
+        if (typeof chromium.executablePath === 'function') {
+            execPath = await chromium.executablePath();
+        }
+
+        const browser = await puppeteer.launch({
+            args: chromium.args || ["--no-sandbox", "--disable-setuid-sandbox"],
+            defaultViewport: chromium.defaultViewport || null,
+            executablePath: execPath,
+            headless: chromium.headless !== undefined ? chromium.headless : true,
+        });
+
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: "networkidle0" });
 
         const pdfBuffer = await page.pdf({
             format: "A4",
@@ -1080,11 +1132,13 @@ async function generatePdfFromHtml(htmlContent) {
                 left: "15mm",
                 right: "15mm"
             }
-        })
+        });
 
-        return pdfBuffer
-    } finally {
-        await browser.close()
+        await browser.close();
+        return pdfBuffer;
+    } catch (err) {
+        console.error("Puppeteer PDF generation error (falling back to built-in PDF stream generator):", err.message || err);
+        return createFallbackPdfBuffer("Optimized Resume", htmlContent);
     }
 }
 
