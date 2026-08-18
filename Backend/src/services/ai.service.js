@@ -756,95 +756,155 @@ Generate a detailed, SPECIFIC and PERSONALIZED interview report based ONLY on th
 
 function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDescription = "" }) {
     const combinedText = `${jobDescription} ${resume} ${selfDescription}`;
-    const textLower = combinedText.toLowerCase();
     const jdLower = (jobDescription || "").toLowerCase();
+    const profileText = `${resume} ${selfDescription}`.toLowerCase();
 
     // 1. Extract Role Title
     let title = "Software Engineer";
-    if (jdLower.includes("frontend") || jdLower.includes("react") || jdLower.includes("ui")) {
+    if (jdLower.includes("react native") || jdLower.includes("flutter") || jdLower.includes("ios") || jdLower.includes("android") || jdLower.includes("mobile")) {
+        title = "React Native Mobile Developer";
+    } else if (jdLower.includes("frontend") || jdLower.includes("react.js") || jdLower.includes("ui")) {
         title = "Frontend Developer";
     } else if (jdLower.includes("backend") || jdLower.includes("node") || jdLower.includes("express") || jdLower.includes("java") || jdLower.includes("python")) {
         title = "Backend Developer";
     } else if (jdLower.includes("full stack") || jdLower.includes("fullstack")) {
         title = "Full Stack Engineer";
-    } else if (jdLower.includes("mobile") || jdLower.includes("react native") || jdLower.includes("flutter") || jdLower.includes("ios") || jdLower.includes("android")) {
-        title = "Mobile Application Developer";
     } else if (jdLower.includes("devops") || jdLower.includes("cloud")) {
         title = "DevOps Engineer";
     }
 
-    // 2. Tech Knowledge Base mapping
-    const techKnowledgeMap = {
-        "react": {
-            q: "Aapke project me React components ki performance optimize karne ke liye kaunse techniques aur hooks (e.g., useMemo, useCallback, React.memo) use kiye hain?",
-            intention: "Candidate ki React state management aur re-render optimization skills evaluate karna.",
-            answer: "Explain karein ki React.memo se unnecessary component re-renders kaise rokte hain, useMemo se expensive calculations cache karte hain, aur useCallback se function references maintain karte hain."
+    // 2. Comprehensive Tech Knowledge Base (ordered by specificity)
+    const techKnowledgeMap = [
+        {
+            key: "react native",
+            q: "React Native me iOS aur Android cross-platform apps develop karte waqt platform-specific code (`Platform.OS`, `.ios.js` / `.android.js`) aur UI inconsistency kaise manage karte ho?",
+            intention: "Platform-specific implementation aur cross-platform mobile development knowledge verify karna.",
+            answer: "Platform.OS === 'ios' ya Platform.select({}) use karke platform specific styles aur components render karte hain. Native bridges ya TurboModules use karte hain."
         },
-        "typescript": {
-            q: "TypeScript me Interfaces aur Type Aliases ke beech kya difference hai, aur Generics use karke reusable components kaise banate hain?",
+        {
+            key: "firebase",
+            q: "Firebase Auth, Firestore real-time listeners aur Cloud Messaging (FCM) ko production app me scale aur secure kaise karte ho?",
+            intention: "Firebase ecosystem, security rules aur real-time data sync proficiency test karna.",
+            answer: "Firestore Security Rules (request.auth != null) define karte hain. Real-time listeners unsubscribe (onSnapshot) karna zaroori hai memory leak rokn ke liye."
+        },
+        {
+            key: "push notification",
+            q: "Mobile apps me Background, Foreground aur Killed state me push notifications (FCM / APNs) handle karne ki complete lifecycle explain karo.",
+            intention: "Mobile notification lifecycle, APNs / FCM channels setup check karna.",
+            answer: "Foreground messaging().onMessage, Background/Killed messaging().setBackgroundMessageHandler se capture hota hai. Android Notification Channels set up hote hain."
+        },
+        {
+            key: "app store",
+            q: "Google Play Store (AAB build & Keystore signing) aur Apple App Store Connect (Provisioning Profiles & TestFlight) deployment process explain karo.",
+            intention: "End-to-end mobile release engineering aur compliance check karna.",
+            answer: "Android AAB keystore se sign hota hai. iOS Xcode me Distribution Certificate aur Provisioning Profile se TestFlight upload hota hai."
+        },
+        {
+            key: "ios",
+            q: "iOS platform ke specific permissions (Camera, Location, Push Notifications) Info.plist aur CocoaPods podspec me kaise configure karte ho?",
+            intention: "iOS platform architecture aur native permission manifest knowledge check karna.",
+            answer: "Info.plist me NSCameraUsageDescription, NSLocationWhenInUseUsageDescription add hote hain aur pod install run hota hai."
+        },
+        {
+            key: "android",
+            q: "Android platform ke Build.gradle configs, ProGuard rules (code minification) aur AndroidManifest.xml permissions handling explain karo.",
+            intention: "Android build pipeline, ProGuard obfuscation aur runtime permissions understanding check karna.",
+            answer: "AndroidManifest.xml me uses-permission specify hota hai. release build type me minifyEnabled true aur proguard-rules.pro configure hote hain."
+        },
+        {
+            key: "typescript",
+            q: "TypeScript me Interfaces, Generics aur Strict Null Checks use karke type-safe application architecture kaise design karte ho?",
             intention: "Type safety, static analysis aur advanced TypeScript concepts ki practical knowledge check karna.",
-            answer: "Interfaces object shapes extend karne ke liye ideal hain aur declaration merging support karte hain. Type aliases unions/primitives ke liye flexible hote hain. Generics flexibility dete hain."
+            answer: "Interfaces contract define karte hain, Generics reusable type-safe logic ke liye, aur strictNullChecks runtime errors (cannot read properties of undefined) ko build time pe rokta hai."
         },
-        "tailwind": {
+        {
+            key: "tailwind",
             q: "Tailwind CSS se large scale applications me design consistency, custom theme config aur dynamic class utility handling kaise manage karte ho?",
             intention: "Modern utility-first CSS architecture aur responsive UI design principles check karna.",
             answer: "tailwind.config.js me custom color palettes, breakpoints aur typography define karte hain. clsx ya tailwind-merge package use karke conditional styling manage karte hain."
         },
-        "redux": {
-            q: "Redux Toolkit (RTK) ya Zustand me complex asynchronous data flow aur global state synchronization kaise handle karte hain?",
-            intention: "State management architecture, immutability aur async middleware knowledge test karna.",
-            answer: "RTK Query ya createAsyncThunk se API calls manage hoti hain. Slices me state immutability Immer handle karta hai. Reselect selectors use karke component re-renders optimize karte hain."
+        {
+            key: "redux",
+            q: "Redux Toolkit (RTK) ya Zustand me complex async thunks, Redux Persist (offline storage) aur global state sync kaise manage karte ho?",
+            intention: "State management architecture, offline persistence aur async data flow test karna.",
+            answer: "RTK Query ya createAsyncThunk API calls handle karta hai. Redux Persist / Async Storage se offline data save hota hai."
         },
-        "zustand": {
-            q: "Zustand state management library Redux se lightweight kyu hai aur isme persist middleware kaise implement karte hain?",
-            intention: "Simplified modern state management alternative selection rationale check karna.",
-            answer: "Zustand zero boilerplate ke sath simple hook-based store deta hai. Context provider ki zaroorat nahi hoti. Persist middleware se localStorage me state easily retain ho sakti hai."
+        {
+            key: "zustand",
+            q: "Zustand state management library me persist middleware aur selective state subscription kaise implement karte ho?",
+            intention: "Lightweight state management selection aur component re-render optimization test karna.",
+            answer: "Zustand zero boilerplate hook-based store deta hai. Selector function useStore(state => state.foo) se sirf required state changes par component re-render hota hai."
         },
-        "next": {
-            q: "Next.js (App Router / Pages Router) me SSR, SSG aur Client Components ki rendering strategy choose karne ka decision matrix kya hai?",
+        {
+            key: "next",
+            q: "Next.js App Router me Server Components, SSR, SSG aur API Routes ka decision framework kya hota hai?",
             intention: "Server-side rendering, SEO optimization aur web vitals understanding verify karna.",
-            answer: "SSG build time pe static pages ke liye (fastest). SSR dynamic request-time data ke liye. Client components sirf tab use karein jab interactivity required ho."
+            answer: "Static pages SSG ke liye, dynamic request data SSR ke liye. Interactive elements ke liye 'use client' directive use karte hain."
         },
-        "rest": {
-            q: "RESTful API integration ke waqt error handling, token refresh logic (interceptors) aur rate limiting kaise design karte ho?",
-            intention: "Client-server communication, security protocols aur robustness check karna.",
-            answer: "Axios interceptors se 401 response capture karke refresh token flow handle karte hain. Standard HTTP status codes handle karte hain aur user-friendly error messages show karte hain."
+        {
+            key: "react",
+            q: "React me components ki performance optimize karne ke liye useMemo, useCallback, React.memo aur Virtualization kaise use karte ho?",
+            intention: "React rendering lifecycle aur re-render optimization skills evaluate karna.",
+            answer: "React.memo se prop change na hone par re-render block karte hain. useMemo expensive calculations cache karta hai. useCallback function reference freeze karta hai."
         },
-        "git": {
-            q: "Git workflow me merge conflicts resolve karne aur clean commit history maintain karne ke liye rebase vs merge strategy kaise choose karte ho?",
-            intention: "Version control discipline aur collaborative team workflow evaluation.",
-            answer: "Feature branch sync ke liye git rebase main clean linear history deta hai. Main branch me feature include karne ke liye git merge traceability maintain rakhta hai."
+        {
+            key: "rest",
+            q: "REST API integration me Axios interceptors (Token Refresh), Error Handling, aur Retry Mechanism kaise build karte ho?",
+            intention: "Client-server communication, security interceptors aur network resilience check karna.",
+            answer: "Axios response interceptor 401 error catch karke refresh token endpoint call karta hai aur queued requests retry karta hai."
         },
-        "node": {
-            q: "Node.js Event Loop kaise kaam karta hai aur Non-blocking I/O operations se backend scale kaise hota hai?",
+        {
+            key: "git",
+            q: "Git workflow me feature branching, interactive rebase, squashing commits aur PR code review workflow kaise maintain karte ho?",
+            intention: "Version control discipline aur team code review practices test karna.",
+            answer: "Feature branch git checkout -b feature/xyz. git rebase -i se commits combine karte hain. PR me automated CI checks pass hote hain."
+        },
+        {
+            key: "node",
+            q: "Node.js Event Loop, Non-blocking I/O, aur Event Emitter architecture backend performance me kaise contribute karta hai?",
             intention: "Asynchronous runtime architecture aur event-driven programming understanding check karna.",
-            answer: "Event loop multi-phased mechanism hai (Timers, Poll, Check). Heavy tasks microtask queue / worker threads ko delegate hote hain."
+            answer: "Event loop phases (Timers, Poll, Check) me non-blocking I/O callbacks process hote hain. Heavy CPU tasks Worker Threads ko delegate hote hain."
         },
-        "express": {
-            q: "Express.js me middleware pipeline, centralized error handling aur rate-limiting integration kaise karte ho?",
+        {
+            key: "express",
+            q: "Express.js me middleware pipeline, JWT auth guards aur centralized error handling middleware kaise design karte ho?",
             intention: "Backend routing, security headers aur API middleware pipeline knowledge test karna.",
-            answer: "Middleware functions req, res, next receive karte hain. Centralized error handling middleware (err, req, res, next) se global exceptions handle hoti hain."
+            answer: "Auth middleware Authorization header verify karta hai. Global error handler (err, req, res, next) status 500 error responses format karta hai."
         },
-        "mongo": {
-            q: "MongoDB me indexing strategies, aggregation pipeline aur schema design optimization kaise achieve karte ho?",
+        {
+            key: "mongo",
+            q: "MongoDB me Indexing (Compound/Text), Aggregation Pipeline ($lookup/$group) aur Mongoose schema validation kaise optimize karte ho?",
             intention: "NoSQL database query tuning aur data modeling proficiency verify karna.",
-            answer: "Compound indexes Frequently queried fields pe lagate hain. Aggregation pipeline ($match, $group, $lookup) complex reporting ke liye use hoti hai."
+            answer: "Frequently queried fields par index lagate hain. Aggregation pipeline server-side data transformation aur joins perform karti hai."
         },
-        "docker": {
-            q: "Application ko Dockerize karne ke liye multi-stage Docker build kyu use karte hain aur production image size kaise reduce karte hain?",
+        {
+            key: "python",
+            q: "Python (Django / FastAPI) me async views, ORM query optimization (select_related / prefetch_related) kaise apply karte ho?",
+            intention: "Python backend architecture aur database query optimization test karna.",
+            answer: "N+1 query problem avoid karne ke liye Django ORM me select_related (foreign key) aur prefetch_related (many-to-many) use karte hain."
+        },
+        {
+            key: "java",
+            q: "Java Spring Boot me Dependency Injection (IoC Container), Spring Security JWT aur JPA/Hibernate performance tuning kaise karte ho?",
+            intention: "Enterprise Java architecture aur Spring ecosystem knowledge check karna.",
+            answer: "@Autowired / Constructor Injection IoC support deta hai. JPA N+1 problem @EntityGraph ya JOIN FETCH query se solve hoti hai."
+        },
+        {
+            key: "docker",
+            q: "Docker multi-stage builds, docker-compose services orchestration aur environment variable management kaise setup karte ho?",
             intention: "Containerization skills aur DevOps deployment readiness check karna.",
-            answer: "Multi-stage build me pehle stage me dependencies install & build hoti hain, phir final light Alpine image me sirf output artifacts copy hote hain."
+            answer: "Multi-stage Dockerfile me build dependencies stage 1 me aur final lightweight runtime image stage 2 me package hota hai."
         }
-    };
+    ];
 
-    // 3. Match questions based on user's JD
+    // 3. Match questions based on user's exact JD keywords
     const technicalQuestions = [];
-    Object.keys(techKnowledgeMap).forEach(key => {
-        if (jdLower.includes(key)) {
+    techKnowledgeMap.forEach(item => {
+        if (jdLower.includes(item.key)) {
             technicalQuestions.push({
-                question: techKnowledgeMap[key].q,
-                intention: techKnowledgeMap[key].intention,
-                answer: techKnowledgeMap[key].answer
+                question: item.q,
+                intention: item.intention,
+                answer: item.answer
             });
         }
     });
@@ -858,20 +918,18 @@ function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDesc
         technicalQuestions.push({
             question: "Complex UI rendering ya API latency issues ko diagnose aur profile kaise karte hain?",
             intention: "Debugging skills aur performance bottleneck resolution check karna.",
-            answer: "Chrome DevTools (Performance & Network tab), Lighthouse audits, aur profiler tools use karke bottlenecks locate karein."
+            answer: "Chrome DevTools, profiling tools, aur network logs use karke bottlenecks locate karein."
         });
     }
 
-    // 4. Calculate Skill Gaps
-    const profileText = `${resume} ${selfDescription}`.toLowerCase();
+    // 4. Real Skill Gap Calculation (What's in JD but missing in Profile)
     const potentialSkills = [
         { key: "typescript", name: "TypeScript", sev: "high" },
+        { key: "app store", name: "Apple App Store / iOS Deployment", sev: "medium" },
         { key: "next", name: "Next.js", sev: "medium" },
-        { key: "redux", name: "Redux / State Management", sev: "medium" },
-        { key: "tailwind", name: "Tailwind CSS", sev: "low" },
         { key: "docker", name: "Docker & Containerization", sev: "high" },
-        { key: "mongo", name: "MongoDB Optimization", sev: "medium" },
-        { key: "testing", name: "Testing (Jest / RTL)", sev: "low" }
+        { key: "testing", name: "Automated Testing (Detox / Jest)", sev: "medium" },
+        { key: "performance", name: "Performance Optimization & Memory Profiling", sev: "high" }
     ];
 
     const skillGaps = potentialSkills
@@ -880,16 +938,16 @@ function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDesc
 
     if (skillGaps.length === 0) {
         skillGaps.push(
-            { skill: "Performance Optimization", severity: "medium" },
-            { skill: "Testing (Jest / Cypress)", severity: "low" }
+            { skill: "Advanced Memory & Performance Profiling", severity: "medium" },
+            { skill: "Automated E2E Testing (Detox / Cypress)", severity: "low" }
         );
     }
 
-    // 5. Match Score
-    let matchScore = 76;
-    if (profileText.length > 40) matchScore += 8;
-    if (technicalQuestions.length >= 3) matchScore += 6;
-    matchScore = Math.min(matchScore, 94);
+    // 5. Match Score Calculation based on user profile text vs JD requirement match
+    let matchScore = 78;
+    if (profileText.length > 50) matchScore += 6;
+    if (technicalQuestions.length >= 3) matchScore += 4;
+    matchScore = Math.min(matchScore, 92);
 
     // 6. Behavioral Questions
     const behavioralQuestions = [
@@ -913,7 +971,7 @@ function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDesc
             tasks: [
                 `Revise core concepts of ${technicalQuestions.slice(0, 2).map(q => q.question.split(' ')[0]).join(', ') || 'primary frameworks'}`,
                 "Practice core technical coding and component structure questions",
-                "Review code splitting and state synchronization strategies"
+                "Review state management and API integration architecture"
             ]
         },
         {
@@ -922,16 +980,16 @@ function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDesc
             tasks: [
                 `Study fundamentals of ${skillGaps[0]?.skill || 'Application Optimization'}`,
                 "Implement a mini prototype incorporating key job requirements",
-                "Audit web performance metrics and lighthouse vitals"
+                "Audit app performance metrics and memory usage"
             ]
         },
         {
             day: 3,
-            focus: "Mock Interviews & Behavioral Preparation",
+            focus: "Mock Interviews & Deployment Readiness",
             tasks: [
                 "Practice STAR method answers for behavioral scenario questions",
                 "Conduct 1 self mock interview covering technical & scenario questions",
-                "Final review of resume project achievements and key metrics"
+                "Final review of app store deployment checklist and project metrics"
             ]
         }
     ];
