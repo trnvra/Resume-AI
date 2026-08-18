@@ -715,7 +715,8 @@ const mockResumes = {
 }
 
 async function generateInterviewReport({ resume, selfDescription, jobDescription }) {
-    const prompt = `You are an expert interview coach and career advisor. Analyze the candidate's profile against the job description and generate a comprehensive, personalized interview preparation report.
+    try {
+        const prompt = `You are an expert interview coach and career advisor. Analyze the candidate's profile against the job description and generate a comprehensive, personalized interview preparation report.
 
 Job Description:
 ${jobDescription}
@@ -735,16 +736,44 @@ Generate a detailed, SPECIFIC and PERSONALIZED interview report based ONLY on th
 - The job title should be extracted from the job description
 `
 
-    const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(interviewReportSchema),
-        }
-    })
+        const response = await ai.models.generateContent({
+            model: "gemini-2.0-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: zodToJsonSchema(interviewReportSchema),
+            }
+        })
 
-    return JSON.parse(response.text)
+        return JSON.parse(response.text)
+    } catch (error) {
+        console.error("Gemini API Error (Falling back to dynamic JD extraction):", error.message || error)
+
+        // Determine title & category from JD keywords
+        const jdLower = (jobDescription || "").toLowerCase()
+        let reportCategory = "fullstack"
+        let detectedTitle = "Software Engineer"
+
+        if (jdLower.includes("frontend") || jdLower.includes("react") || jdLower.includes("vue") || jdLower.includes("angular")) {
+            reportCategory = "frontend"
+            detectedTitle = "Frontend Engineer"
+        } else if (jdLower.includes("backend") || jdLower.includes("node") || jdLower.includes("express") || jdLower.includes("java") || jdLower.includes("python")) {
+            reportCategory = "backend"
+            detectedTitle = "Backend Engineer"
+        } else if (jdLower.includes("mobile") || jdLower.includes("native") || jdLower.includes("flutter") || jdLower.includes("ios") || jdLower.includes("android")) {
+            reportCategory = "reactnative"
+            detectedTitle = "Mobile Application Developer"
+        } else if (jdLower.includes("full stack") || jdLower.includes("fullstack")) {
+            reportCategory = "fullstack"
+            detectedTitle = "Full Stack Engineer"
+        }
+
+        const fallback = mockReports[reportCategory] || mockReports.frontend
+        return {
+            ...fallback,
+            title: detectedTitle
+        }
+    }
 }
 
 // async function generatePdfFromHtml(htmlContent) {
