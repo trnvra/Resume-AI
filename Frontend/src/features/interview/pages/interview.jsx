@@ -392,9 +392,6 @@ const Interview = () => {
                 </aside>
             </div>
 
-                </button>
-            </div>
-
             {showHistory && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
                     <div style={{ background: '#0f172a', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto', border: '1px solid #334155', color: '#fff' }}>
