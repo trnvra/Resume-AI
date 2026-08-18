@@ -680,8 +680,26 @@ $col-eval:   #22c55e;
     }
 }
 
+.desktop-only-btn {
+    display: block;
+}
+
+.mobile-bottom-actions {
+    display: none;
+}
+
+.match-and-gaps-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
 // ── Mobile & Tablet Responsiveness ───────────────────────────────────────────
 @media (max-width: 1024px) {
+    .desktop-only-btn {
+        display: none !important;
+    }
+
     .interview-page {
         padding: 0.5rem !important;
         align-items: flex-start !important;
@@ -726,13 +744,6 @@ $col-eval:   #22c55e;
             font-size: 0.8rem !important;
             flex-shrink: 0 !important;
         }
-
-        button.download-resume-btn {
-            order: 4 !important;
-            width: 100% !important;
-            margin: 1.5rem 0 1rem 0 !important;
-            justify-content: center !important;
-        }
     }
 
     .interview-sidebar {
@@ -740,21 +751,34 @@ $col-eval:   #22c55e;
         width: 100% !important;
         max-width: 100% !important;
         flex-shrink: 1 !important;
-        padding: 1rem 0.5rem 1.5rem 0.5rem !important;
-        gap: 1.25rem !important;
+        padding: 0.75rem 0.5rem 1rem 0.5rem !important;
+        gap: 1rem !important;
 
-        .match-score {
-            align-items: center !important;
-            &__label { align-self: center !important; }
+        .match-and-gaps-row {
+            flex-direction: row !important;
+            align-items: flex-start !important;
+            justify-content: space-between !important;
+            gap: 1rem !important;
+            width: 100% !important;
+            background: rgba(255,255,255,0.02);
+            padding: 0.875rem;
+            border-radius: 0.875rem;
+            border: 1px solid rgba(255,255,255,0.06);
         }
 
-        button.primary-button {
-            position: relative !important;
-            bottom: auto !important;
-            left: auto !important;
-            width: 100% !important;
-            margin-top: 0.5rem !important;
-            justify-content: center !important;
+        .match-score {
+            flex: 0 0 auto !important;
+            align-items: center !important;
+
+            &__label { align-self: center !important; margin-bottom: 0.25rem !important; }
+            &__sub   { font-size: 0.75rem !important; text-align: center !important; max-width: 110px !important; }
+        }
+
+        .skill-gaps {
+            flex: 1 1 auto !important;
+            
+            &__label { margin-bottom: 0.4rem !important; }
+            &__list  { gap: 0.35rem !important; }
         }
     }
 
@@ -766,6 +790,26 @@ $col-eval:   #22c55e;
         padding: 1rem 0.5rem !important;
         max-height: none !important;
         overflow-y: visible !important;
+    }
+
+    .mobile-bottom-actions {
+        order: 4 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+        margin: 1.25rem 0 0.5rem 0 !important;
+
+        button {
+            flex: 1 1 50% !important;
+            padding: 0.75rem 0.5rem !important;
+            font-size: 0.8rem !important;
+            justify-content: center !important;
+            white-space: nowrap !important;
+
+            svg { display: none !important; }
+        }
     }
 
     .interview-divider {
