@@ -715,30 +715,36 @@ const mockResumes = {
 }
 
 async function generateInterviewReport({ resume, selfDescription, jobDescription }) {
-    let reportType = "fullstack"
-    const jd = jobDescription.toLowerCase()
-    if (jd.includes("frontend") || jd.includes("react.js") && !jd.includes("node")) reportType = "frontend"
-    else if (jd.includes("backend") || jd.includes("node.js") && !jd.includes("react")) reportType = "backend"
-    else if (jd.includes("react native") || jd.includes("mobile")) reportType = "reactnative"
-    else if (jd.includes("full stack") || jd.includes("fullstack")) reportType = "fullstack"
+    const prompt = `You are an expert interview coach and career advisor. Analyze the candidate's profile against the job description and generate a comprehensive, personalized interview preparation report.
 
-    return mockReports[reportType]
+Job Description:
+${jobDescription}
 
-    // REAL API - quota aane pe uncomment karo, upar wala return hatao
-    // const prompt = `Generate an interview report for a candidate with the following details:
-    //                     Resume: ${resume}
-    //                     Self Description: ${selfDescription}
-    //                     Job Description: ${jobDescription}
-    // `
-    // const response = await ai.models.generateContent({
-    //     model: "gemini-2.0-flash-lite",
-    //     contents: prompt,
-    //     config: {
-    //         responseMimeType: "application/json",
-    //         responseSchema: zodToJsonSchema(interviewReportSchema),
-    //     }
-    // })
-    // return JSON.parse(response.text)
+Candidate Resume:
+${resume || "Not provided"}
+
+Candidate Self Description:
+${selfDescription || "Not provided"}
+
+Generate a detailed, SPECIFIC and PERSONALIZED interview report based ONLY on the actual job description and candidate profile provided above. 
+- Technical questions must be directly relevant to the technologies/skills mentioned in the JD
+- Skill gaps must reflect what the candidate is actually missing for THIS specific role
+- Match score should reflect how well the candidate matches THIS JD
+- Preparation plan should address the ACTUAL gaps found
+- Do NOT use generic questions - make them specific to the job role and requirements
+- The job title should be extracted from the job description
+`
+
+    const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: zodToJsonSchema(interviewReportSchema),
+        }
+    })
+
+    return JSON.parse(response.text)
 }
 
 // async function generatePdfFromHtml(htmlContent) {
