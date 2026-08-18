@@ -14,12 +14,12 @@ const interviewReportSchema = z.object({
         question: z.string().describe("The technical question can be asked in the interview"),
         intention: z.string().describe("The intention of interviewer behind asking this question"),
         answer: z.string().describe("How to answer this question, what points to cover, what approach to take etc.")
-    })).describe("Technical questions that can be asked in the interview along with their intention and how to answer them"),
+    })).min(5).describe("At least 5 technical questions that can be asked in the interview along with their intention and how to answer them"),
     behavioralQuestions: z.array(z.object({
-        question: z.string().describe("The technical question can be asked in the interview"),
+        question: z.string().describe("The behavioral question can be asked in the interview"),
         intention: z.string().describe("The intention of interviewer behind asking this question"),
         answer: z.string().describe("How to answer this question, what points to cover, what approach to take etc.")
-    })).describe("Behavioral questions that can be asked in the interview along with their intention and how to answer them"),
+    })).min(5).describe("At least 5 behavioral questions that can be asked in the interview along with their intention and how to answer them"),
     skillGaps: z.array(z.object({
         skill: z.string().describe("The skill which the candidate is lacking"),
         severity: z.enum([ "low", "medium", "high" ]).describe("The severity of this skill gap, i.e. how important is this skill for the job and how much it can impact the candidate's chances")
@@ -909,17 +909,39 @@ function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDesc
         }
     });
 
-    if (technicalQuestions.length < 3) {
-        technicalQuestions.push({
-            question: `${title} role ke liye aapka system architecture design karne ka approach kya hai?`,
+    // Fallback pool to ensure AT LEAST 5 technical questions
+    const fallbackTechnicalPool = [
+        {
+            question: `${title} role ke liye aapka system architecture design aur modular component structuring ka approach kya hai?`,
             intention: "Scalable application design aur core architectural principles check karna.",
             answer: "Modular structure, clear separation of concerns, DRY principles, and proper state & data flow management focus karein."
-        });
-        technicalQuestions.push({
-            question: "Complex UI rendering ya API latency issues ko diagnose aur profile kaise karte hain?",
+        },
+        {
+            question: "Complex UI rendering, memory leaks ya API latency issues ko diagnose aur profile kaise karte hain?",
             intention: "Debugging skills aur performance bottleneck resolution check karna.",
-            answer: "Chrome DevTools, profiling tools, aur network logs use karke bottlenecks locate karein."
-        });
+            answer: "Chrome DevTools, profiling tools, memory snapshots, aur network logs use karke bottlenecks locate karein."
+        },
+        {
+            question: "Application me authentication state, sensitive tokens (JWT/OAuth) aur secure storage handling kaise design karte ho?",
+            intention: "Client-side security, token lifecycle management aur data protection knowledge check karna.",
+            answer: "Tokens ko Secure Store (mobile) / HttpOnly cookies (web) me store karte hain. Expiry handle karne ke liye refresh token flow use karte hain."
+        },
+        {
+            question: "Automated unit testing aur integration testing (Jest / Testing Library) ko development workflow me kaise incorporate karte ho?",
+            intention: "Code reliability, regression prevention aur test-driven development awareness verify karna.",
+            answer: "Critical business logic aur core components ke unit test cases likhte hain. CI/CD pipeline me automated test suites pass karate hain."
+        },
+        {
+            question: "Production builds me bundle size optimization, tree-shaking aur lazy loading techniques kaise apply karte ho?",
+            intention: "Build optimization, initial load performance aur resource management knowledge verify karna.",
+            answer: "Dynamic imports (`import()`), code splitting, unused dependency pruning aur asset compression use karte hain."
+        }
+    ];
+
+    let fallbackIndex = 0;
+    while (technicalQuestions.length < 5 && fallbackIndex < fallbackTechnicalPool.length) {
+        technicalQuestions.push(fallbackTechnicalPool[fallbackIndex]);
+        fallbackIndex++;
     }
 
     // 4. Real Skill Gap Calculation (What's in JD but missing in Profile)
@@ -949,7 +971,7 @@ function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDesc
     if (technicalQuestions.length >= 3) matchScore += 4;
     matchScore = Math.min(matchScore, 92);
 
-    // 6. Behavioral Questions
+    // 6. Behavioral Questions (MINIMUM 5 QUESTIONS)
     const behavioralQuestions = [
         {
             question: `Is ${title} position me tight deadlines aur changing requirements ko aapne past projects me kaise handle kiya?`,
@@ -957,9 +979,24 @@ function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDesc
             answer: "STAR method (Situation, Task, Action, Result) follow karein. Clear communication aur sprint task re-prioritization highlight karein."
         },
         {
-            question: "Jab team members ke saath technical design strategy par disagreement ho, toh resolution kaise nikalte ho?",
+            question: "Jab team members ya cross-functional stakeholders ke saath technical architecture design par disagreement ho, toh resolution kaise nikalte ho?",
             intention: "Collaboration, constructive feedback aur team-first mindset test karna.",
             answer: "Data-driven approach, prototyping trade-offs evaluate karna, aur technical consensus achieve karne ki story batayein."
+        },
+        {
+            question: "Production environment me kisi critical bug ya app crash report hone par aapka immediate response, root cause analysis aur post-mortem process kya hota hai?",
+            intention: "Crisis management, systematic debugging aur accountability evaluate karna.",
+            answer: "Pehle hotfix ya rollback se system stabilize karte hain, crash logs analyze karte hain, phir root cause identify karke permanent fix & regression tests deploy karte hain."
+        },
+        {
+            question: "Naye tools, frameworks ya unfamiliar codebase ko rapidly learn aur adapt karne ke liye aapka self-learning approach kya rehta hai?",
+            intention: "Continuous learning ability, curiosity aur self-driven growth check karna.",
+            answer: "Official documentation, core architecture overview, aur small hands-on proof-of-concept projects build karke learn karte hain."
+        },
+        {
+            question: "Aapne apne past project me code quality, refactoring, automated testing ya technical debt reduce karne ke liye kya proactive initiatives liye hain?",
+            intention: "Code ownership, engineering discipline aur long-term product vision check karna.",
+            answer: "Code reviews, linting rules enforcement, modular refactoring, aur automated test suite integration ke positive outcomes share karein."
         }
     ];
 
@@ -969,7 +1006,7 @@ function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDesc
             day: 1,
             focus: `Core ${title} Fundamentals & Tech Stack`,
             tasks: [
-                `Revise core concepts of ${technicalQuestions.slice(0, 2).map(q => q.question.split(' ')[0]).join(', ') || 'primary frameworks'}`,
+                `Revise core concepts of ${technicalQuestions.slice(0, 3).map(q => q.question.split(' ')[0]).join(', ') || 'primary frameworks'}`,
                 "Practice core technical coding and component structure questions",
                 "Review state management and API integration architecture"
             ]
@@ -997,8 +1034,8 @@ function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDesc
     return {
         title,
         matchScore,
-        technicalQuestions: technicalQuestions.slice(0, 5),
-        behavioralQuestions,
+        technicalQuestions: technicalQuestions.slice(0, 6),
+        behavioralQuestions: behavioralQuestions.slice(0, 5),
         skillGaps: skillGaps.slice(0, 4),
         preparationPlan
     };
