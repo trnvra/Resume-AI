@@ -20,14 +20,16 @@ export const useInterview = () => {
         let response = null
         try {
             response = await generateInterviewReport({ jobDescription, selfDescription, resumeFile })
-            setReport(response.interviewReport)
+            if (response?.interviewReport) {
+                setReport(response.interviewReport)
+            }
         } catch (error) {
-            console.log(error)
+            console.error("Generate Report Error:", error)
         } finally {
             setLoading(false)
         }
 
-        return response.interviewReport
+        return response?.interviewReport
     }
 
     const getReportById = async (interviewId) => {

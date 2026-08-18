@@ -178,29 +178,28 @@ const QuestionCard = ({ item, index, jobDescription, report }) => {
                     </div>
 
                     {/* Interactive Practice Mode */}
-                    <div className='q-card__section mock-practice-box' style={{ marginTop: '12px', padding: '12px', background: '#131927', borderRadius: '8px', border: '1px solid #1f293d' }}>
-                        <span className='q-card__tag' style={{ background: '#e11d48', color: '#fff' }}>🎯 Practice Answer (Mock Interview)</span>
+                    <div className='q-card__section mock-practice-box'>
+                        <span className='practice-tag'>🎯 Practice Answer (Mock Interview)</span>
                         <textarea
                             value={userAnswer}
                             onChange={(e) => setUserAnswer(e.target.value)}
                             placeholder="Type your answer here to get live AI feedback..."
                             rows={3}
-                            style={{ width: '100%', marginTop: '8px', padding: '10px', background: '#0b0f19', color: '#fff', border: '1px solid #2d3748', borderRadius: '6px' }}
                         />
                         <button
+                            className='eval-btn'
                             onClick={handleEvaluate}
                             disabled={loadingEval || !userAnswer.trim()}
-                            style={{ marginTop: '8px', padding: '6px 14px', background: '#e11d48', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                         >
-                            {loadingEval ? 'Evaluating...' : 'Submit Answer for AI Review'}
+                            {loadingEval ? 'Evaluating…' : 'Submit Answer for AI Review'}
                         </button>
 
                         {evaluation && (
-                            <div className='eval-result' style={{ marginTop: '12px', padding: '10px', background: '#0f172a', borderRadius: '6px', borderLeft: '3px solid #22c55e' }}>
-                                <p style={{ color: '#22c55e', fontWeight: 'bold' }}>AI Score: {evaluation.score}/100</p>
-                                <p style={{ color: '#e2e8f0', fontSize: '13px', marginTop: '4px' }}><strong>Feedback:</strong> {evaluation.feedback}</p>
+                            <div className='eval-result'>
+                                <p className='eval-score'>AI Score: {evaluation.score}/100</p>
+                                <p className='eval-feedback'><strong>Feedback:</strong> {evaluation.feedback}</p>
                                 {evaluation.improvements?.length > 0 && (
-                                    <ul style={{ color: '#cbd5e1', fontSize: '12px', marginTop: '6px', paddingLeft: '16px' }}>
+                                    <ul className='eval-improvements'>
                                         {evaluation.improvements.map((imp, idx) => (
                                             <li key={idx}>{imp}</li>
                                         ))}
@@ -267,9 +266,11 @@ const Interview = () => {
 
     if (loading || !report) {
         return (
-            <main className='loading-screen'>
-                <h1>Loading your interview plan...</h1>
-            </main>
+            <div className='interview-page'>
+                <div style={{ position:'relative', zIndex:1, display:'flex', alignItems:'center', justifyContent:'center', flex:1 }}>
+                    <h1 style={{ fontSize:'1.1rem', fontWeight:600, color:'#9494a8' }}>Loading your interview plan…</h1>
+                </div>
+            </div>
         )
     }
 

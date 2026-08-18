@@ -1,67 +1,335 @@
-// ── Variables ────────────────────────────────────────────────────────────────
-$bg-page:        #0d1117;
-$bg-card:        #161b22;
-$bg-panel:       #1c2230;
-$bg-input:       #1e2535;
-$border-color:   #2a3348;
-$text-primary:   #e6edf3;
-$text-muted:     #7d8590;
-$accent:         #ff2d78;
-$accent-alt:     #ff6b9d;
-$badge-required: #ff2d78;
-$badge-best:     #ff2d78;
-$info-bg:        #1b2a4a;
-$info-border:    #2d4a7a;
-$font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+// ── Variables ─────────────────────────────────────────────────────────────────
+// ── AI Loading Screen ─────────────────────────────────────────────────────────
+@keyframes spin-ring {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+@keyframes spin-ring-rev {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-360deg); }
+}
+@keyframes orb-pulse {
+    0%, 100% { box-shadow: 0 0 24px rgba(225,3,77,0.5); transform: scale(1); }
+    50%       { box-shadow: 0 0 48px rgba(225,3,77,0.3); transform: scale(1.06); }
+}
+@keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+}
+@keyframes bounce-dot {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40%           { transform: translateY(-8px); opacity: 1; }
+}
+@keyframes loading-fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.ai-loading-page {
+    min-height: 100vh;
+    width: 100%;
+    background: #0a0a0f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+
+    &::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background:
+            radial-gradient(ellipse 70% 50% at 20% 10%, rgba(225,3,77,0.12) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 50% at 80% 90%, rgba(139,0,225,0.08) 0%, transparent 60%);
+        pointer-events: none;
+    }
+}
+
+.ai-loading-card {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 3rem 2.5rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 1.5rem;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(225,3,77,0.06);
+    min-width: 340px;
+    animation: loading-fade-in 0.5s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+.ai-loading-orb {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &__ring {
+        position: absolute;
+        border-radius: 50%;
+        border: 2px solid transparent;
+    }
+
+    .ring-1 {
+        inset: 0;
+        border-top-color: rgba(225, 3, 77, 0.8);
+        border-right-color: rgba(225, 3, 77, 0.2);
+        animation: spin-ring 1.2s linear infinite;
+    }
+    .ring-2 {
+        inset: 10px;
+        border-bottom-color: rgba(255, 45, 110, 0.6);
+        border-left-color: rgba(255, 45, 110, 0.15);
+        animation: spin-ring-rev 1.8s linear infinite;
+    }
+    .ring-3 {
+        inset: 20px;
+        border-top-color: rgba(225, 3, 77, 0.4);
+        animation: spin-ring 2.4s linear infinite;
+    }
+
+    &__core {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e1034d, #ff2d6e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        animation: orb-pulse 2s ease-in-out infinite;
+        z-index: 1;
+    }
+}
+
+.ai-loading-text {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #f0f0f5;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+}
+
+.ai-loading-typewriter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    min-height: 1.5rem;
+}
+
+.ai-loading-line {
+    font-size: 0.9rem;
+    color: #9494a8;
+    font-weight: 400;
+}
+
+.ai-loading-cursor {
+    font-size: 1rem;
+    color: #e1034d;
+    font-weight: 300;
+    animation: blink-cursor 0.8s ease-in-out infinite;
+}
+
+.ai-loading-dots {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+
+    span {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #e1034d;
+        animation: bounce-dot 1.2s ease-in-out infinite;
+
+        &:nth-child(1) { animation-delay: 0s; }
+        &:nth-child(2) { animation-delay: 0.18s; }
+        &:nth-child(3) { animation-delay: 0.36s; }
+    }
+}
+// ── End Loading Screen ────────────────────────────────────────────────────────
+
+$accent:       #e1034d;
+$accent-light: #ff2d6e;
+$accent-glow:  rgba(225, 3, 77, 0.3);
+$bg-page:      #0a0a0f;
+$bg-card:      rgba(255,255,255,0.035);
+$bg-panel:     rgba(255,255,255,0.025);
+$bg-input:     rgba(255,255,255,0.055);
+$border:       rgba(255,255,255,0.08);
+$border-focus: rgba(225, 3, 77, 0.5);
+$text-primary: #f0f0f5;
+$text-muted:   #6b6b82;
+$text-sec:     #9494a8;
+$info-bg:      rgba(74, 144, 226, 0.08);
+$info-border:  rgba(74, 144, 226, 0.2);
+$font-stack:   'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+// ── Keyframes ────────────────────────────────────────────────────────────────
+@keyframes float-orb {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(-40px, 50px) scale(1.15); }
+}
+
+@keyframes float-orb-2 {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(30px, -40px) scale(1.1); }
+}
+
+@keyframes slide-up-fade {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer-text {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 8px $accent-glow; }
+    50%       { box-shadow: 0 0 28px $accent-glow, 0 0 60px rgba(225,3,77,0.12); }
+}
 
 // ── Page Shell ───────────────────────────────────────────────────────────────
 .home-page {
     width: 100%;
     min-height: 100vh;
-    background-color: $bg-page;
+    background: $bg-page;
     color: $text-primary;
     font-family: $font-stack;
+    -webkit-font-smoothing: antialiased;
 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 3rem 1.5rem;
-    gap: 2rem;
+    gap: 2.25rem;
+    position: relative;
+    overflow: hidden;
+
+    // Animated gradient background
+    &::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background:
+            radial-gradient(ellipse 70% 50% at 15% 5%,  rgba(225,3,77,0.10) 0%, transparent 65%),
+            radial-gradient(ellipse 60% 50% at 85% 95%, rgba(139,0,225,0.07) 0%, transparent 65%),
+            radial-gradient(ellipse 40% 40% at 50% 50%, rgba(225,3,77,0.03) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    // Floating orb top-right
+    &::after {
+        content: '';
+        position: fixed;
+        width: 600px;
+        height: 600px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(225,3,77,0.055) 0%, transparent 70%);
+        top: -200px;
+        right: -150px;
+        pointer-events: none;
+        z-index: 0;
+        animation: float-orb 10s ease-in-out infinite alternate;
+    }
+
+    // Floating orb bottom-left
+    .orb-2 {
+        display: none; // handled via pseudo-el below
+    }
+}
+
+// Second orb via a utility approach — attaching to home-page children
+.home-page > * {
+    position: relative;
+    z-index: 1;
 }
 
 // ── Page Header ──────────────────────────────────────────────────────────────
 .page-header {
     text-align: center;
+    animation: slide-up-fade 0.5s cubic-bezier(0.4,0,0.2,1) both;
 
     h1 {
-        font-size: 2.25rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.6rem;
         color: $text-primary;
+        line-height: 1.2;
     }
 
     p {
-        color: $text-muted;
-        font-size: 0.95rem;
-        max-width: 480px;
+        color: $text-sec;
+        font-size: 0.9375rem;
+        max-width: 500px;
         margin: 0 auto;
-        line-height: 1.6;
+        line-height: 1.7;
+        font-weight: 400;
     }
 
     .highlight {
-        color: $accent;
+        background: linear-gradient(90deg, $accent, #ff6b9d, $accent);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shimmer-text 3.5s linear infinite;
+    }
+}
+
+// ── Loading Screen ────────────────────────────────────────────────────────────
+.loading-screen {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $bg-page;
+    font-family: $font-stack;
+
+    h1 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $text-sec;
     }
 }
 
 // ── Main Card ─────────────────────────────────────────────────────────────────
 .interview-card {
     width: 100%;
-    max-width: 900px;
-    background-color: $bg-card;
-    border: 1px solid $border-color;
-    border-radius: 1rem;
+    max-width: 940px;
+    background: $bg-card;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid $border;
+    border-radius: 1.25rem;
     overflow: hidden;
+    box-shadow:
+        0 0 0 1px rgba(225,3,77,0.05),
+        0 32px 80px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    animation: slide-up-fade 0.55s cubic-bezier(0.4,0,0.2,1) 0.05s both;
 
     &__body {
         display: flex;
@@ -73,11 +341,13 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
         align-items: center;
         justify-content: space-between;
         padding: 1rem 1.5rem;
-        border-top: 1px solid $border-color;
+        border-top: 1px solid $border;
+        background: rgba(255,255,255,0.018);
 
         .footer-info {
             font-size: 0.8rem;
             color: $text-muted;
+            letter-spacing: 0.01em;
         }
     }
 }
@@ -85,7 +355,11 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
 // ── Panels ────────────────────────────────────────────────────────────────────
 .panel-divider {
     width: 1px;
-    background-color: $border-color;
+    background: linear-gradient(to bottom,
+        transparent 0%,
+        $border 15%,
+        $border 85%,
+        transparent 100%);
     flex-shrink: 0;
 }
 
@@ -94,7 +368,7 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding: 1.5rem;
+    padding: 1.75rem;
 
     &__header {
         display: flex;
@@ -103,10 +377,11 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
         margin-bottom: 0.25rem;
 
         h2 {
-            font-size: 1rem;
+            font-size: 0.9375rem;
             font-weight: 600;
             color: $text-primary;
             flex: 1;
+            letter-spacing: -0.01em;
         }
     }
 
@@ -114,34 +389,35 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
         display: flex;
         align-items: center;
         color: $accent;
+        filter: drop-shadow(0 0 6px $accent-glow);
     }
 
     &__textarea {
         flex: 1;
         width: 100%;
-        background-color: $bg-input;
-        border: 1px solid $border-color;
-        border-radius: 0.5rem;
-        padding: 0.75rem 1rem;
+        background: $bg-input;
+        border: 1px solid $border;
+        border-radius: 0.75rem;
+        padding: 0.875rem 1rem;
         color: $text-primary;
         font-family: $font-stack;
         font-size: 0.875rem;
         resize: none;
         outline: none;
-        transition: border-color 0.2s;
-        line-height: 1.5;
+        transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        line-height: 1.6;
 
-        &::placeholder {
-            color: $text-muted;
-        }
+        &::placeholder { color: $text-muted; }
 
         &:focus {
-            border-color: $accent;
+            border-color: $border-focus;
+            background: rgba(225,3,77,0.035);
+            box-shadow: 0 0 0 3px rgba(225,3,77,0.09);
         }
 
         &--short {
             flex: unset;
-            height: 96px;
+            height: 100px;
         }
     }
 
@@ -150,37 +426,36 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
 
         .char-counter {
             position: absolute;
-            bottom: 2.25rem;
+            bottom: 2.5rem;
             right: 2rem;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: $text-muted;
+            letter-spacing: 0.02em;
         }
     }
 
-    &--right {
-        gap: 0.75rem;
-    }
+    &--right { gap: 0.75rem; }
 }
 
 // ── Badges ────────────────────────────────────────────────────────────────────
 .badge {
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 0.15rem 0.5rem;
-    border-radius: 0.3rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.18rem 0.55rem;
+    border-radius: 0.35rem;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.06em;
 
     &--required {
-        background-color: rgba($badge-required, 0.15);
-        color: $badge-required;
-        border: 1px solid rgba($badge-required, 0.3);
+        background: rgba($accent, 0.12);
+        color: $accent-light;
+        border: 1px solid rgba($accent, 0.25);
     }
 
     &--best {
-        background-color: rgba($badge-best, 0.15);
-        color: $badge-best;
-        border: 1px solid rgba($badge-best, 0.3);
+        background: rgba(225,160,0,0.12);
+        color: #f5c842;
+        border: 1px solid rgba(225,160,0,0.25);
     }
 }
 
@@ -189,10 +464,10 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 500;
-    color: $text-primary;
-    margin-bottom: 0.25rem;
+    color: $text-sec;
+    letter-spacing: 0.01em;
 }
 
 // ── Dropzone ──────────────────────────────────────────────────────────────────
@@ -203,40 +478,78 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
 }
 
 .dropzone {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    padding: 1.5rem 1rem;
-    background-color: $bg-input;
-    border: 2px dashed $border-color;
-    border-radius: 0.6rem;
-    cursor: pointer;
-    transition: border-color 0.2s, background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1.5rem 1rem;
+  background: rgba(255, 255, 255, 0.055);
+  border: 2px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.dropzone:hover,
+.dropzone--dragging {
+  border-color: rgba(225, 3, 77, 0.5);
+  background: rgba(225, 3, 77, 0.04);
+  box-shadow: 0 0 0 4px rgba(225, 3, 77, 0.06);
+}
+.dropzone--filled {
+  border-style: solid;
+  border-color: rgba(63, 185, 80, 0.45);
+  background: rgba(63, 185, 80, 0.04);
+  box-shadow: 0 0 0 3px rgba(63, 185, 80, 0.08);
+}
+.dropzone__icon {
+  color: #e1034d;
+  margin-bottom: 0.2rem;
+  filter: drop-shadow(0 0 8px rgba(225, 3, 77, 0.3));
+  transition: transform 0.2s;
+}
+.dropzone__icon--success {
+  color: #3fb950;
+  filter: drop-shadow(0 0 10px rgba(63, 185, 80, 0.35));
+}
+.dropzone:hover .dropzone__icon {
+  transform: translateY(-2px);
+}
+.dropzone__title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #f0f0f5;
+  margin: 0;
+}
+.dropzone__title--success {
+  color: #3fb950;
+  font-weight: 600;
+  word-break: break-all;
+  text-align: center;
+  font-size: 0.82rem;
+}
+.dropzone__subtitle {
+  font-size: 0.73rem;
+  color: #6b6b82;
+  margin: 0;
+}
+.dropzone__remove {
+  margin-top: 0.4rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.15s, transform 0.15s;
 
-    &:hover {
-        border-color: $accent;
-        background-color: rgba($accent, 0.05);
-    }
-
-    &__icon {
-        color: $accent;
-        margin-bottom: 0.25rem;
-    }
-
-    &__title {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: $text-primary;
-        margin: 0;
-    }
-
-    &__subtitle {
-        font-size: 0.75rem;
-        color: $text-muted;
-        margin: 0;
-    }
+  &:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: scale(1.04);
+  }
 }
 
 // ── OR Divider ────────────────────────────────────────────────────────────────
@@ -245,18 +558,15 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     align-items: center;
     gap: 0.75rem;
     color: $text-muted;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 
-    &::before,
-    &::after {
+    &::before, &::after {
         content: '';
         flex: 1;
         height: 1px;
-        background-color: $border-color;
-    }
-
-    span {
-        white-space: nowrap;
+        background: linear-gradient(to right, transparent, $border, transparent);
     }
 }
 
@@ -273,101 +583,155 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     align-items: flex-start;
     gap: 0.6rem;
     padding: 0.75rem 1rem;
-    background-color: $info-bg;
+    background: $info-bg;
     border: 1px solid $info-border;
-    border-radius: 0.5rem;
+    border-radius: 0.625rem;
+    backdrop-filter: blur(8px);
 
     &__icon {
         flex-shrink: 0;
         color: #4a90e2;
         margin-top: 1px;
+        filter: drop-shadow(0 0 6px rgba(74,144,226,0.4));
     }
 
     p {
         margin: 0;
         font-size: 0.8rem;
-        color: #8ab4f8;
-        line-height: 1.5;
+        color: rgba(138,180,248,0.85);
+        line-height: 1.55;
 
-        strong {
-            color: $text-primary;
-        }
+        strong { color: $text-primary; font-weight: 600; }
     }
 }
 
 // ── Generate Button ───────────────────────────────────────────────────────────
+@keyframes btn-shimmer {
+    0%   { transform: translateX(-120%) skewX(-15deg); }
+    100% { transform: translateX(300%) skewX(-15deg); }
+}
+
+@keyframes btn-glow-pulse {
+    0%, 100% { box-shadow: 0 4px 22px $accent-glow, 0 0 40px rgba(225,3,77,0.12); }
+    50%       { box-shadow: 0 8px 36px $accent-glow, 0 0 65px rgba(225,3,77,0.22); }
+}
+
 .generate-btn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, $accent 0%, darken($accent, 10%) 100%);
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.9rem 2rem;
+    background: linear-gradient(135deg, #c8023f 0%, $accent 45%, $accent-light 100%);
     color: #fff;
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 0.9375rem;
+    font-weight: 700;
     border: none;
-    border-radius: 0.5rem;
+    border-radius: 0.875rem;
     cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
     font-family: $font-stack;
+    letter-spacing: 0.025em;
+    animation: btn-glow-pulse 3s ease-in-out infinite;
+    transition: transform 0.2s cubic-bezier(0.4,0,0.2,1), filter 0.2s;
+    position: relative;
+    overflow: hidden;
+    min-width: 260px;
+
+    // Shimmer sweep
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0; bottom: 0;
+        width: 35%;
+        background: linear-gradient(
+            to right,
+            transparent 0%,
+            rgba(255,255,255,0.22) 50%,
+            transparent 100%
+        );
+        animation: btn-shimmer 2.8s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    // Top shine line
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 1px;
+        background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
+        pointer-events: none;
+    }
 
     &:hover {
-        opacity: 0.9;
+        transform: translateY(-3px) scale(1.015);
+        filter: brightness(1.08);
     }
 
     &:active {
-        transform: scale(0.98);
+        transform: scale(0.97) translateY(0);
+        filter: brightness(0.95);
+    }
+
+    svg {
+        flex-shrink: 0;
+        filter: drop-shadow(0 0 4px rgba(255,255,255,0.4));
     }
 }
 
-.recent-reports{
+// ── Recent Reports ────────────────────────────────────────────────────────────
+.recent-reports {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
     width: 100%;
-    max-width: 900px;
+    max-width: 940px;
 
-    .reports-list{
+    .reports-list {
         display: flex;
         gap: 0.75rem;
         flex-wrap: wrap;
 
-        .report-item{
-            background-color: $bg-card;
-            border: 1px solid $border-color;
-            border-radius: 0.5rem;
-            padding: 1rem;
+        .report-item {
+            background: $bg-card;
+            border: 1px solid $border;
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
             flex: 1;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
             cursor: pointer;
             flex-shrink: 0;
+            transition: border-color 0.2s, box-shadow 0.2s;
+
+            &:hover {
+                border-color: rgba($accent, 0.3);
+                box-shadow: 0 0 0 3px rgba($accent, 0.06);
+            }
 
             .match-score {
                 font-size: 0.8rem;
                 font-weight: 600;
                 color: $accent;
-                align-items: flex-start;
             }
         }
     }
 }
 
-
 // ── Page Footer ───────────────────────────────────────────────────────────────
 .page-footer {
     display: flex;
     gap: 1.5rem;
+    animation: slide-up-fade 0.5s cubic-bezier(0.4,0,0.2,1) 0.1s both;
 
     a {
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         color: $text-muted;
         text-decoration: none;
         transition: color 0.2s;
+        letter-spacing: 0.01em;
 
-        &:hover {
-            color: $text-primary;
-        }
+        &:hover { color: $text-sec; }
     }
 }
