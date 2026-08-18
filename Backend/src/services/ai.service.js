@@ -747,33 +747,203 @@ Generate a detailed, SPECIFIC and PERSONALIZED interview report based ONLY on th
 
         return JSON.parse(response.text)
     } catch (error) {
-        console.error("Gemini API Error (Falling back to dynamic JD extraction):", error.message || error)
+        console.error("Gemini API Call Exception (falling back to dynamic JD/Resume text analysis):", error.message || error)
 
-        // Determine title & category from JD keywords
-        const jdLower = (jobDescription || "").toLowerCase()
-        let reportCategory = "fullstack"
-        let detectedTitle = "Software Engineer"
-
-        if (jdLower.includes("frontend") || jdLower.includes("react") || jdLower.includes("vue") || jdLower.includes("angular")) {
-            reportCategory = "frontend"
-            detectedTitle = "Frontend Engineer"
-        } else if (jdLower.includes("backend") || jdLower.includes("node") || jdLower.includes("express") || jdLower.includes("java") || jdLower.includes("python")) {
-            reportCategory = "backend"
-            detectedTitle = "Backend Engineer"
-        } else if (jdLower.includes("mobile") || jdLower.includes("native") || jdLower.includes("flutter") || jdLower.includes("ios") || jdLower.includes("android")) {
-            reportCategory = "reactnative"
-            detectedTitle = "Mobile Application Developer"
-        } else if (jdLower.includes("full stack") || jdLower.includes("fullstack")) {
-            reportCategory = "fullstack"
-            detectedTitle = "Full Stack Engineer"
-        }
-
-        const fallback = mockReports[reportCategory] || mockReports.frontend
-        return {
-            ...fallback,
-            title: detectedTitle
-        }
+        // Dynamic analysis fallback based on user's ACTUAL Job Description and Resume input
+        return buildDynamicReportFromText({ jobDescription, resume, selfDescription })
     }
+}
+
+function buildDynamicReportFromText({ jobDescription = "", resume = "", selfDescription = "" }) {
+    const combinedText = `${jobDescription} ${resume} ${selfDescription}`;
+    const textLower = combinedText.toLowerCase();
+    const jdLower = (jobDescription || "").toLowerCase();
+
+    // 1. Extract Role Title
+    let title = "Software Engineer";
+    if (jdLower.includes("frontend") || jdLower.includes("react") || jdLower.includes("ui")) {
+        title = "Frontend Developer";
+    } else if (jdLower.includes("backend") || jdLower.includes("node") || jdLower.includes("express") || jdLower.includes("java") || jdLower.includes("python")) {
+        title = "Backend Developer";
+    } else if (jdLower.includes("full stack") || jdLower.includes("fullstack")) {
+        title = "Full Stack Engineer";
+    } else if (jdLower.includes("mobile") || jdLower.includes("react native") || jdLower.includes("flutter") || jdLower.includes("ios") || jdLower.includes("android")) {
+        title = "Mobile Application Developer";
+    } else if (jdLower.includes("devops") || jdLower.includes("cloud")) {
+        title = "DevOps Engineer";
+    }
+
+    // 2. Tech Knowledge Base mapping
+    const techKnowledgeMap = {
+        "react": {
+            q: "Aapke project me React components ki performance optimize karne ke liye kaunse techniques aur hooks (e.g., useMemo, useCallback, React.memo) use kiye hain?",
+            intention: "Candidate ki React state management aur re-render optimization skills evaluate karna.",
+            answer: "Explain karein ki React.memo se unnecessary component re-renders kaise rokte hain, useMemo se expensive calculations cache karte hain, aur useCallback se function references maintain karte hain."
+        },
+        "typescript": {
+            q: "TypeScript me Interfaces aur Type Aliases ke beech kya difference hai, aur Generics use karke reusable components kaise banate hain?",
+            intention: "Type safety, static analysis aur advanced TypeScript concepts ki practical knowledge check karna.",
+            answer: "Interfaces object shapes extend karne ke liye ideal hain aur declaration merging support karte hain. Type aliases unions/primitives ke liye flexible hote hain. Generics flexibility dete hain."
+        },
+        "tailwind": {
+            q: "Tailwind CSS se large scale applications me design consistency, custom theme config aur dynamic class utility handling kaise manage karte ho?",
+            intention: "Modern utility-first CSS architecture aur responsive UI design principles check karna.",
+            answer: "tailwind.config.js me custom color palettes, breakpoints aur typography define karte hain. clsx ya tailwind-merge package use karke conditional styling manage karte hain."
+        },
+        "redux": {
+            q: "Redux Toolkit (RTK) ya Zustand me complex asynchronous data flow aur global state synchronization kaise handle karte hain?",
+            intention: "State management architecture, immutability aur async middleware knowledge test karna.",
+            answer: "RTK Query ya createAsyncThunk se API calls manage hoti hain. Slices me state immutability Immer handle karta hai. Reselect selectors use karke component re-renders optimize karte hain."
+        },
+        "zustand": {
+            q: "Zustand state management library Redux se lightweight kyu hai aur isme persist middleware kaise implement karte hain?",
+            intention: "Simplified modern state management alternative selection rationale check karna.",
+            answer: "Zustand zero boilerplate ke sath simple hook-based store deta hai. Context provider ki zaroorat nahi hoti. Persist middleware se localStorage me state easily retain ho sakti hai."
+        },
+        "next": {
+            q: "Next.js (App Router / Pages Router) me SSR, SSG aur Client Components ki rendering strategy choose karne ka decision matrix kya hai?",
+            intention: "Server-side rendering, SEO optimization aur web vitals understanding verify karna.",
+            answer: "SSG build time pe static pages ke liye (fastest). SSR dynamic request-time data ke liye. Client components sirf tab use karein jab interactivity required ho."
+        },
+        "rest": {
+            q: "RESTful API integration ke waqt error handling, token refresh logic (interceptors) aur rate limiting kaise design karte ho?",
+            intention: "Client-server communication, security protocols aur robustness check karna.",
+            answer: "Axios interceptors se 401 response capture karke refresh token flow handle karte hain. Standard HTTP status codes handle karte hain aur user-friendly error messages show karte hain."
+        },
+        "git": {
+            q: "Git workflow me merge conflicts resolve karne aur clean commit history maintain karne ke liye rebase vs merge strategy kaise choose karte ho?",
+            intention: "Version control discipline aur collaborative team workflow evaluation.",
+            answer: "Feature branch sync ke liye git rebase main clean linear history deta hai. Main branch me feature include karne ke liye git merge traceability maintain rakhta hai."
+        },
+        "node": {
+            q: "Node.js Event Loop kaise kaam karta hai aur Non-blocking I/O operations se backend scale kaise hota hai?",
+            intention: "Asynchronous runtime architecture aur event-driven programming understanding check karna.",
+            answer: "Event loop multi-phased mechanism hai (Timers, Poll, Check). Heavy tasks microtask queue / worker threads ko delegate hote hain."
+        },
+        "express": {
+            q: "Express.js me middleware pipeline, centralized error handling aur rate-limiting integration kaise karte ho?",
+            intention: "Backend routing, security headers aur API middleware pipeline knowledge test karna.",
+            answer: "Middleware functions req, res, next receive karte hain. Centralized error handling middleware (err, req, res, next) se global exceptions handle hoti hain."
+        },
+        "mongo": {
+            q: "MongoDB me indexing strategies, aggregation pipeline aur schema design optimization kaise achieve karte ho?",
+            intention: "NoSQL database query tuning aur data modeling proficiency verify karna.",
+            answer: "Compound indexes Frequently queried fields pe lagate hain. Aggregation pipeline ($match, $group, $lookup) complex reporting ke liye use hoti hai."
+        },
+        "docker": {
+            q: "Application ko Dockerize karne ke liye multi-stage Docker build kyu use karte hain aur production image size kaise reduce karte hain?",
+            intention: "Containerization skills aur DevOps deployment readiness check karna.",
+            answer: "Multi-stage build me pehle stage me dependencies install & build hoti hain, phir final light Alpine image me sirf output artifacts copy hote hain."
+        }
+    };
+
+    // 3. Match questions based on user's JD
+    const technicalQuestions = [];
+    Object.keys(techKnowledgeMap).forEach(key => {
+        if (jdLower.includes(key)) {
+            technicalQuestions.push({
+                question: techKnowledgeMap[key].q,
+                intention: techKnowledgeMap[key].intention,
+                answer: techKnowledgeMap[key].answer
+            });
+        }
+    });
+
+    if (technicalQuestions.length < 3) {
+        technicalQuestions.push({
+            question: `${title} role ke liye aapka system architecture design karne ka approach kya hai?`,
+            intention: "Scalable application design aur core architectural principles check karna.",
+            answer: "Modular structure, clear separation of concerns, DRY principles, and proper state & data flow management focus karein."
+        });
+        technicalQuestions.push({
+            question: "Complex UI rendering ya API latency issues ko diagnose aur profile kaise karte hain?",
+            intention: "Debugging skills aur performance bottleneck resolution check karna.",
+            answer: "Chrome DevTools (Performance & Network tab), Lighthouse audits, aur profiler tools use karke bottlenecks locate karein."
+        });
+    }
+
+    // 4. Calculate Skill Gaps
+    const profileText = `${resume} ${selfDescription}`.toLowerCase();
+    const potentialSkills = [
+        { key: "typescript", name: "TypeScript", sev: "high" },
+        { key: "next", name: "Next.js", sev: "medium" },
+        { key: "redux", name: "Redux / State Management", sev: "medium" },
+        { key: "tailwind", name: "Tailwind CSS", sev: "low" },
+        { key: "docker", name: "Docker & Containerization", sev: "high" },
+        { key: "mongo", name: "MongoDB Optimization", sev: "medium" },
+        { key: "testing", name: "Testing (Jest / RTL)", sev: "low" }
+    ];
+
+    const skillGaps = potentialSkills
+        .filter(s => jdLower.includes(s.key) && !profileText.includes(s.key))
+        .map(s => ({ skill: s.name, severity: s.sev }));
+
+    if (skillGaps.length === 0) {
+        skillGaps.push(
+            { skill: "Performance Optimization", severity: "medium" },
+            { skill: "Testing (Jest / Cypress)", severity: "low" }
+        );
+    }
+
+    // 5. Match Score
+    let matchScore = 76;
+    if (profileText.length > 40) matchScore += 8;
+    if (technicalQuestions.length >= 3) matchScore += 6;
+    matchScore = Math.min(matchScore, 94);
+
+    // 6. Behavioral Questions
+    const behavioralQuestions = [
+        {
+            question: `Is ${title} position me tight deadlines aur changing requirements ko aapne past projects me kaise handle kiya?`,
+            intention: "Adaptability, prioritization aur stress management capability check karna.",
+            answer: "STAR method (Situation, Task, Action, Result) follow karein. Clear communication aur sprint task re-prioritization highlight karein."
+        },
+        {
+            question: "Jab team members ke saath technical design strategy par disagreement ho, toh resolution kaise nikalte ho?",
+            intention: "Collaboration, constructive feedback aur team-first mindset test karna.",
+            answer: "Data-driven approach, prototyping trade-offs evaluate karna, aur technical consensus achieve karne ki story batayein."
+        }
+    ];
+
+    // 7. Preparation Plan
+    const preparationPlan = [
+        {
+            day: 1,
+            focus: `Core ${title} Fundamentals & Tech Stack`,
+            tasks: [
+                `Revise core concepts of ${technicalQuestions.slice(0, 2).map(q => q.question.split(' ')[0]).join(', ') || 'primary frameworks'}`,
+                "Practice core technical coding and component structure questions",
+                "Review code splitting and state synchronization strategies"
+            ]
+        },
+        {
+            day: 2,
+            focus: "Performance & Skill Gap Bridging",
+            tasks: [
+                `Study fundamentals of ${skillGaps[0]?.skill || 'Application Optimization'}`,
+                "Implement a mini prototype incorporating key job requirements",
+                "Audit web performance metrics and lighthouse vitals"
+            ]
+        },
+        {
+            day: 3,
+            focus: "Mock Interviews & Behavioral Preparation",
+            tasks: [
+                "Practice STAR method answers for behavioral scenario questions",
+                "Conduct 1 self mock interview covering technical & scenario questions",
+                "Final review of resume project achievements and key metrics"
+            ]
+        }
+    ];
+
+    return {
+        title,
+        matchScore,
+        technicalQuestions: technicalQuestions.slice(0, 5),
+        behavioralQuestions,
+        skillGaps: skillGaps.slice(0, 4),
+        preparationPlan
+    };
 }
 
 // async function generatePdfFromHtml(htmlContent) {
