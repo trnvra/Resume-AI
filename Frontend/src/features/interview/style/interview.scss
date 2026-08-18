@@ -691,34 +691,26 @@ $col-eval:   #22c55e;
     }
 
     .interview-layout {
+        display: flex !important;
         flex-direction: column !important;
         border-radius: 1rem !important;
         width: 100% !important;
         max-width: 100% !important;
         height: auto !important;
         overflow: visible !important;
-    }
-
-    .interview-divider {
-        width: 100% !important;
-        height: 1px !important;
-        min-height: 1px !important;
-        flex-shrink: 0 !important;
-        background: linear-gradient(to right, transparent, $border 15%, $border 85%, transparent) !important;
+        padding: 0.75rem !important;
     }
 
     .interview-nav {
-        width: 100% !important;
-        max-width: 100% !important;
-        flex-shrink: 1 !important;
-        padding: 1rem 0.875rem !important;
-        gap: 0.75rem !important;
+        display: contents !important;
 
         .nav-content {
+            order: 1 !important;
+            display: flex !important;
             flex-direction: row !important;
             overflow-x: auto !important;
             gap: 0.5rem !important;
-            padding-bottom: 0.25rem !important;
+            padding: 0.5rem 0 1rem 0 !important;
             -webkit-overflow-scrolling: touch;
             width: 100% !important;
 
@@ -735,27 +727,20 @@ $col-eval:   #22c55e;
             flex-shrink: 0 !important;
         }
 
-        button.primary-button {
+        button.download-resume-btn {
+            order: 4 !important;
             width: 100% !important;
-            margin-top: 0.5rem !important;
+            margin: 1.5rem 0 1rem 0 !important;
             justify-content: center !important;
         }
     }
 
-    .interview-content {
-        width: 100% !important;
-        max-width: 100% !important;
-        flex: 1 1 auto !important;
-        padding: 1.25rem 1rem 2rem !important;
-        max-height: none !important;
-        overflow-y: visible !important;
-    }
-
     .interview-sidebar {
+        order: 2 !important;
         width: 100% !important;
         max-width: 100% !important;
         flex-shrink: 1 !important;
-        padding: 1.25rem 1rem 2rem !important;
+        padding: 1rem 0.5rem 1.5rem 0.5rem !important;
         gap: 1.25rem !important;
 
         .match-score {
@@ -771,6 +756,20 @@ $col-eval:   #22c55e;
             margin-top: 0.5rem !important;
             justify-content: center !important;
         }
+    }
+
+    .interview-content {
+        order: 3 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 1 1 auto !important;
+        padding: 1rem 0.5rem !important;
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+
+    .interview-divider {
+        display: none !important;
     }
 }
 
